@@ -1,0 +1,37 @@
+name: Build ARAB SOFT for Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: arab_work/arabsoft_service_system/requirements.txt
+
+      - name: Install dependencies
+        working-directory: arab_work
+        run: python -m pip install -r arabsoft_service_system/requirements.txt
+
+      - name: Build Windows EXE
+        working-directory: arab_work
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name ARAB_SOFT_Service --icon arabsoft_service_system\ARAB_SOFT.ico launcher.py
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: ARAB_SOFT_Service-Windows
+          path: arab_work/dist/ARAB_SOFT_Service.exe
+          if-no-files-found: error
+          retention-days: 30
